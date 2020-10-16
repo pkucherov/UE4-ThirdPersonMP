@@ -1,4 +1,4 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+// Copyright 1998-2019 Epic Games, Inc. All Rights Reserved.
 
 #include "ThirdPersonMPCharacter.h"
 #include "HeadMountedDisplayFunctionLibrary.h"
@@ -11,6 +11,7 @@
 #include "Net/UnrealNetwork.h"
 #include "Engine/Engine.h"
 #include "ThirdPersonMPProjectile.h"
+//#include "TimerManager.h"
 
 //////////////////////////////////////////////////////////////////////////
 // AThirdPersonMPCharacter
@@ -30,7 +31,7 @@ AThirdPersonMPCharacter::AThirdPersonMPCharacter()
 	bUseControllerRotationRoll = false;
 
 	// Configure character movement
-	GetCharacterMovement()->bOrientRotationToMovement = true; // Character moves in the direction of input...	
+	GetCharacterMovement()->bOrientRotationToMovement = true; // Character moves in the direction of input...   
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 540.0f, 0.0f); // ...at this rotation rate
 	GetCharacterMovement()->JumpZVelocity = 600.f;
 	GetCharacterMovement()->AirControl = 0.2f;
@@ -38,7 +39,7 @@ AThirdPersonMPCharacter::AThirdPersonMPCharacter()
 	// Create a camera boom (pulls in towards the player if there is a collision)
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
-	CameraBoom->TargetArmLength = 300.0f; // The camera follows at this distance behind the character	
+	CameraBoom->TargetArmLength = 300.0f; // The camera follows at this distance behind the character   
 	CameraBoom->bUsePawnControlRotation = true; // Rotate the arm based on the controller
 
 	// Create a follow camera
@@ -90,6 +91,7 @@ void AThirdPersonMPCharacter::SetupPlayerInputComponent(class UInputComponent* P
 
 	// Handle firing projectiles
 	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AThirdPersonMPCharacter::StartFire);
+	//PlayerInputComponent->BindAction("Fire", IE_Released, this, &AThirdPersonMPCharacter::StopFire);
 }
 
 
@@ -100,12 +102,12 @@ void AThirdPersonMPCharacter::OnResetVR()
 
 void AThirdPersonMPCharacter::TouchStarted(ETouchIndex::Type FingerIndex, FVector Location)
 {
-		Jump();
+	Jump();
 }
 
 void AThirdPersonMPCharacter::TouchStopped(ETouchIndex::Type FingerIndex, FVector Location)
 {
-		StopJumping();
+	StopJumping();
 }
 
 void AThirdPersonMPCharacter::TurnAtRate(float Rate)
@@ -141,7 +143,7 @@ void AThirdPersonMPCharacter::MoveRight(float Value)
 		// find out which way is right
 		const FRotator Rotation = Controller->GetControlRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
-	
+
 		// get right vector 
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 		// add movement in that direction
@@ -156,7 +158,6 @@ void AThirdPersonMPCharacter::GetLifetimeReplicatedProps(TArray <FLifetimeProper
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	//Replicate current health.
 	DOREPLIFETIME(AThirdPersonMPCharacter, CurrentHealth);
 
 
@@ -226,6 +227,19 @@ void AThirdPersonMPCharacter::StopFire()
 {
 	bIsFiringWeapon = false;
 }
+
+//void AThirdPersonMPCharacter::HandleFire_Implementation()
+//{
+//	FVector spawnLocation = GetActorLocation() + (GetActorRotation().Vector() * 100.0f) + (GetActorUpVector() * 50.0f);
+//	FRotator spawnRotation = GetActorRotation();
+//
+//	FActorSpawnParameters spawnParameters;
+//	spawnParameters.Instigator = GetInstigator();
+//	spawnParameters.Owner = this;
+//
+//	AThirdPersonMPProjectile* spawnedProjectile = GetWorld()->SpawnActor<AThirdPersonMPProjectile>(ProjectileClass, spawnLocation, spawnRotation, spawnParameters);
+//}
+
 
 void AThirdPersonMPCharacter::HandleFire_Implementation()
 {
