@@ -18,13 +18,7 @@ void AHttpService::BeginPlay() {
 	Login(LoginCredentials);
 }
 
-
-
-
 /**********************************************************************************************************************************************/
-
-
-
 
 TSharedRef<IHttpRequest> AHttpService::RequestWithRoute(FString Subroute) {
 	TSharedRef<IHttpRequest> Request = Http->CreateRequest();

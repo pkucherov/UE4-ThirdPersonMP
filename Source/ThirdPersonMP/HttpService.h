@@ -59,6 +59,4 @@ public:
 
 	void Login(FRequest_Login LoginCredentials);
 	void LoginResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
-
-
 };
