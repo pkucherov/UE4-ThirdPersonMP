@@ -3,8 +3,9 @@
 #include "ThirdPersonMPGameMode.h"
 #include "ThirdPersonMPCharacter.h"
 #include "UObject/ConstructorHelpers.h"
+#include "HttpService.h"
 
-AThirdPersonMPGameMode::AThirdPersonMPGameMode()
+AThirdPersonMPGameMode::AThirdPersonMPGameMode():HttpService(nullptr)
 {
 	// set default pawn class to our Blueprinted character
 	static ConstructorHelpers::FClassFinder<APawn> PlayerPawnBPClass(TEXT("/Game/Blueprints/ThirdPersonCharacter"));
@@ -12,4 +13,10 @@ AThirdPersonMPGameMode::AThirdPersonMPGameMode()
 	{
 		DefaultPawnClass = PlayerPawnBPClass.Class;
 	}
+}
+
+void AThirdPersonMPGameMode::StartPlay()
+{
+	Super::StartPlay();
+	HttpService = GetWorld()->SpawnActor<AHttpService>();
 }

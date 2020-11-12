@@ -13,6 +13,10 @@ class AThirdPersonMPGameMode : public AGameModeBase
 
 public:
 	AThirdPersonMPGameMode();
+
+	void StartPlay() override;
+
+	class AHttpService* HttpService;
 };
 
 

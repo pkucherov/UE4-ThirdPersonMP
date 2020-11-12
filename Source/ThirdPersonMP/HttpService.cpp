@@ -1,6 +1,4 @@
 // Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "HttpService.h"
 
 AHttpService::AHttpService() { PrimaryActorTick.bCanEverTick = false; }
@@ -15,10 +13,8 @@ void AHttpService::BeginPlay() {
 	FRequest_Login LoginCredentials;
 	LoginCredentials.email = TEXT("asdf@asdf.com");
 	LoginCredentials.password = TEXT("asdfasdf");
-	Login(LoginCredentials);
+	//Login(LoginCredentials);
 }
-
-/**********************************************************************************************************************************************/
 
 TSharedRef<IHttpRequest> AHttpService::RequestWithRoute(FString Subroute) {
 	TSharedRef<IHttpRequest> Request = Http->CreateRequest();
@@ -47,8 +43,8 @@ TSharedRef<IHttpRequest> AHttpService::PostRequest(FString Subroute, FString Con
 	return Request;
 }
 
-void AHttpService::Send(TSharedRef<IHttpRequest>& Request) {
-	Request->ProcessRequest();
+bool AHttpService::Send(TSharedRef<IHttpRequest>& Request) {
+	return Request->ProcessRequest();
 }
 
 bool AHttpService::ResponseIsValid(FHttpResponsePtr Response, bool bWasSuccessful) {
@@ -64,12 +60,6 @@ void AHttpService::SetAuthorizationHash(FString Hash/*, TSharedRef<IHttpRequest>
 	AuthorizationHash = Hash;
 }
 
-
-
-/**********************************************************************************************************************************************/
-
-
-
 template <typename StructType>
 void AHttpService::GetJsonStringFromStruct(StructType FilledStruct, FString& StringOutput) {
 	FJsonObjectConverter::UStructToJsonObjectString(StructType::StaticStruct(), &FilledStruct, StringOutput, 0, 0);
@@ -81,12 +71,6 @@ void AHttpService::GetStructFromJsonString(FHttpResponsePtr Response, StructType
 	FString JsonString = Response->GetContentAsString();
 	FJsonObjectConverter::JsonObjectStringToUStruct<StructType>(JsonString, &StructOutput, 0, 0);
 }
-
-
-
-/**********************************************************************************************************************************************/
-
-
 
 void AHttpService::Login(FRequest_Login LoginCredentials) {
 	FString ContentJsonString;
@@ -108,3 +92,43 @@ void AHttpService::LoginResponse(FHttpRequestPtr Request, FHttpResponsePtr Respo
 	UE_LOG(LogTemp, Warning, TEXT("Id is: %d"), LoginResponse.id);
 	UE_LOG(LogTemp, Warning, TEXT("Name is: %s"), *LoginResponse.name);
 }
+
+void AHttpService::Ping() {
+	TSharedRef<IHttpRequest> Request = GetRequest("ping");
+	Request->OnProcessRequestComplete().BindUObject(this, &AHttpService::OnResponseReceived);
+		
+	if (Send(Request))
+	{
+		FHttpResponsePtr response = Request->GetResponse();
+		if (response)
+		{
+			FString strResponse = response->GetContentAsString();
+			//UE_LOG(LogTemp, Warning, strResponse.Printf("%s"));
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("AHttpService::Ping() Send failed"));
+	}
+}
+
+void AHttpService::OnResponseReceived(FHttpRequestPtr RequestP, FHttpResponsePtr Response, bool bWasSuccessful)
+{
+	FHttpResponsePtr response = RequestP->GetResponse();
+	FString strResponse = response->GetContentAsString();
+}
+
+/*
+void temp_aa()
+{
+	auto Request = FHttpModule::Get().CreateRequest();
+
+	//Request->OnProcessRequestComplete().BindUObject(this, &ABoxGridActor::OnResponseReceived);
+	//   //This is the url on which to process the request
+	Request->SetURL("http://localhost:8092");
+	Request->SetVerb("GET");
+	Request->SetHeader(TEXT("User-Agent"), "X-UnrealEngine-Agent");
+	Request->SetHeader("Content-Type", TEXT("application/json"));
+	//Request->ProcessRequest();
+}
+*/

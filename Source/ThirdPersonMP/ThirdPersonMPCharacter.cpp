@@ -11,6 +11,8 @@
 #include "Net/UnrealNetwork.h"
 #include "Engine/Engine.h"
 #include "ThirdPersonMPProjectile.h"
+#include "ThirdPersonMPGameMode.h"
+#include "HttpService.h"
 
 //////////////////////////////////////////////////////////////////////////
 // AThirdPersonMPCharacter
@@ -197,6 +199,8 @@ void AThirdPersonMPCharacter::OnHealthUpdate()
 void AThirdPersonMPCharacter::OnRep_CurrentHealth()
 {
 	OnHealthUpdate();
+
+	
 }
 
 void AThirdPersonMPCharacter::SetCurrentHealth(float healthValue)
@@ -241,6 +245,24 @@ void AThirdPersonMPCharacter::HandleFire_Implementation()
 	spawnParameters.Owner = this;
 
 	AThirdPersonMPProjectile* spawnedProjectile = GetWorld()->SpawnActor<AThirdPersonMPProjectile>(spawnLocation, spawnRotation, spawnParameters);
+
+	UGameInstance* gi = GetGameInstance();
+	UWorld* world = GetWorld();
+
+	AGameModeBase* baseMode = world->GetAuthGameMode();
+	if (baseMode)
+	{
+		AThirdPersonMPGameMode* gameMode = world->GetAuthGameMode<AThirdPersonMPGameMode>();
+		if (gameMode)
+		{
+			AHttpService* service = gameMode->HttpService;
+			if (service)
+			{
+				service->Ping();
+			}
+		}
+	}
+
 }
 
 // Called when the game starts or when spawned

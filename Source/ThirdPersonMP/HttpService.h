@@ -34,7 +34,7 @@ class THIRDPERSONMP_API AHttpService : public AActor
 	GENERATED_BODY()
 private:
 	FHttpModule* Http;
-	FString ApiBaseUrl = "http://localhost:5003/api/";
+	FString ApiBaseUrl = "http://localhost:5000/api/v1/";
 
 	FString AuthorizationHeader = TEXT("Authorization");
 	FString AuthorizationHash = TEXT("asdfasdf");
@@ -45,7 +45,7 @@ private:
 
 	TSharedRef<IHttpRequest> GetRequest(FString Subroute);
 	TSharedRef<IHttpRequest> PostRequest(FString Subroute, FString ContentJsonString);
-	void Send(TSharedRef<IHttpRequest>& Request);
+	bool Send(TSharedRef<IHttpRequest>& Request);
 
 	bool ResponseIsValid(FHttpResponsePtr Response, bool bWasSuccessful);
 
@@ -53,10 +53,13 @@ private:
 	void GetJsonStringFromStruct(StructType FilledStruct, FString& StringOutput);
 	template <typename StructType>
 	void GetStructFromJsonString(FHttpResponsePtr Response, StructType& StructOutput);
+
+	void OnResponseReceived(FHttpRequestPtr RequestP, FHttpResponsePtr Response, bool bWasSuccessful);
 public:
 	AHttpService();
 	virtual void BeginPlay() override;
 
 	void Login(FRequest_Login LoginCredentials);
 	void LoginResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
+	void Ping();
 };
